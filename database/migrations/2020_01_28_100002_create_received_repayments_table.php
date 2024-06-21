@@ -19,6 +19,10 @@ class CreateReceivedRepaymentsTable extends Migration
 
             // TODO: Add missing columns here
 
+            $table->decimal('amount', 10, 2);
+            $table->string('currency_code');
+            $table->date('received_at');
+
             $table->timestamps();
             $table->softDeletes();
 
