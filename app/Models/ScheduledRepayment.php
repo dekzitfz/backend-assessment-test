@@ -27,7 +27,11 @@ class ScheduledRepayment extends Model
      * @var array
      */
     protected $fillable = [
-        //
+        'amount',
+        'outstanding_amount',
+        'currency_code',
+        'due_date',
+        'status',
     ];
 
     /**

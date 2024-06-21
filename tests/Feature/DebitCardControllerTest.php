@@ -2,8 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\DebitCard;
+use App\Models\DebitCardTransaction;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Laravel\Passport\Passport;
 use Tests\TestCase;
 
@@ -22,53 +26,142 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanSeeAListOfDebitCards()
     {
-        // get /debit-cards
+        DebitCard::factory()
+            ->count(3)
+            ->active()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->getJson('api/debit-cards');
+        $response
+            ->assertOk()
+            ->assertJsonCount(3)
+            ->assertJsonStructure(['*' => ['id', 'number', 'type', 'expiration_date', 'is_active']]);
     }
 
     public function testCustomerCannotSeeAListOfDebitCardsOfOtherCustomers()
     {
-        // get /debit-cards
+        $response = $this->getJson('api/debit-cards');
+        $response
+            ->assertOk()
+            ->assertJsonCount(0);
     }
 
     public function testCustomerCanCreateADebitCard()
     {
-        // post /debit-cards
+        $response = $this->postJson('api/debit-cards', ['type' => 'foo']);
+        $response
+            ->assertCreated()
+            ->assertJson(['type' => 'foo'])
+            ->assertJsonStructure(['id', 'number', 'type', 'expiration_date', 'is_active']);
+
+        $this->assertDatabaseHas('debit_cards', [
+            'user_id' => $this->user->id,
+            'type' => 'foo',
+        ]);
     }
 
     public function testCustomerCanSeeASingleDebitCardDetails()
     {
-        // get api/debit-cards/{debitCard}
+        $debitCard = DebitCard::factory()
+            ->active()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->getJson("api/debit-cards/{$debitCard->id}");
+        $response
+            ->assertOk()
+            ->assertJson(['number' => $debitCard->number, 'type' => $debitCard->type])
+            ->assertJsonStructure(['id', 'number', 'type', 'expiration_date', 'is_active']);
     }
 
     public function testCustomerCannotSeeASingleDebitCardDetails()
     {
-        // get api/debit-cards/{debitCard}
+        $this->expectException(ModelNotFoundException::class);
+
+        $this->withoutExceptionHandling()->getJson('api/debit-cards/1');
     }
 
     public function testCustomerCanActivateADebitCard()
     {
-        // put api/debit-cards/{debitCard}
+        $debitCard = DebitCard::factory()
+            ->expired()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->putJson("api/debit-cards/{$debitCard->id}", ['is_active' => true]);
+        $response
+            ->assertOk()
+            ->assertJson(['number' => $debitCard->number, 'type' => $debitCard->type, 'is_active' => true])
+            ->assertJsonStructure(['id', 'number', 'type', 'expiration_date', 'is_active']);
+
+        $this->assertDatabaseHas('debit_cards', [
+            'user_id' => $this->user->id,
+            'disabled_at' => null,
+            'type' => $debitCard->type,
+            'number' => $debitCard->number,
+        ]);
     }
 
     public function testCustomerCanDeactivateADebitCard()
     {
-        // put api/debit-cards/{debitCard}
+        $debitCard = DebitCard::factory()
+            ->active()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->putJson("api/debit-cards/{$debitCard->id}", ['is_active' => false]);
+        $response
+            ->assertOk()
+            ->assertJson(['number' => $debitCard->number, 'type' => $debitCard->type, 'is_active' => false])
+            ->assertJsonStructure(['id', 'number', 'type', 'expiration_date', 'is_active']);
+
+        $this->assertDatabaseHas('debit_cards', [
+            'user_id' => $this->user->id,
+            'disabled_at' => Carbon::now(),
+            'type' => $debitCard->type,
+            'number' => $debitCard->number,
+        ]);
     }
 
     public function testCustomerCannotUpdateADebitCardWithWrongValidation()
     {
-        // put api/debit-cards/{debitCard}
+        $debitCard = DebitCard::factory()
+            ->active()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->putJson("api/debit-cards/{$debitCard->id}", ['is_active' => 'foo']);
+        $response
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('is_active');
     }
 
     public function testCustomerCanDeleteADebitCard()
     {
-        // delete api/debit-cards/{debitCard}
+        $debitCard = DebitCard::factory()
+            ->active()
+            ->for($this->user, 'user')
+            ->create();
+
+        $response = $this->deleteJson("api/debit-cards/{$debitCard->id}");
+        $response->assertNoContent();
+
+        $this->assertDatabaseHas('debit_cards', [
+            'user_id' => $this->user->id,
+            'deleted_at' => Carbon::now(),
+        ]);
     }
 
     public function testCustomerCannotDeleteADebitCardWithTransaction()
     {
-        // delete api/debit-cards/{debitCard}
-    }
+        $debitCard = DebitCard::factory()
+            ->active()
+            ->for($this->user)
+            ->has(DebitCardTransaction::factory()->count(5), 'debitCardTransactions')
+            ->create();
 
-    // Extra bonus for extra tests :)
+        $response = $this->deleteJson("api/debit-cards/{$debitCard->id}");
+        $response->assertForbidden();
+    }
 }
