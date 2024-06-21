@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\DebitCard;
+use App\Models\DebitCardTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Passport\Passport;
@@ -27,33 +28,73 @@ class DebitCardTransactionControllerTest extends TestCase
 
     public function testCustomerCanSeeAListOfDebitCardTransactions()
     {
-        // get /debit-card-transactions
+        DebitCardTransaction::factory()->count(5)->for($this->debitCard)->create();
+
+        $response = $this->getJson("api/debit-card-transactions?debit_card_id={$this->debitCard->id}");
+        $response
+            ->assertOk()
+            ->assertJsonCount(5)
+            ->assertJsonStructure(['*' => ['amount', 'currency_code']]);
     }
 
     public function testCustomerCannotSeeAListOfDebitCardTransactionsOfOtherCustomerDebitCard()
     {
-        // get /debit-card-transactions
+        $debitCard = DebitCard::factory()->create();
+
+        $response = $this->getJson("api/debit-card-transactions?debit_card_id={$debitCard->id}");
+        $response->assertForbidden();
     }
 
     public function testCustomerCanCreateADebitCardTransaction()
     {
-        // post /debit-card-transactions
+        $response = $this->postJson('api/debit-card-transactions', [
+            'debit_card_id' => $this->debitCard->id,
+            'amount' => 2000,
+            'currency_code' => DebitCardTransaction::CURRENCY_VND
+        ]);
+
+        $response
+            ->assertCreated()
+            ->assertJson(['amount' => 2000, 'currency_code' => DebitCardTransaction::CURRENCY_VND])
+            ->assertJsonStructure(['amount', 'currency_code']);
+
+        $this->assertDatabaseHas('debit_card_transactions', [
+            'debit_card_id' => $this->debitCard->id,
+            'amount' => 2000,
+            'currency_code' => DebitCardTransaction::CURRENCY_VND
+        ]);
     }
 
     public function testCustomerCannotCreateADebitCardTransactionToOtherCustomerDebitCard()
     {
-        // post /debit-card-transactions
+        $debitCard = DebitCard::factory()->create();
+
+        $response = $this->postJson('api/debit-card-transactions', [
+            'debit_card_id' => $debitCard->id,
+            'amount' => 2000,
+            'currency_code' => DebitCardTransaction::CURRENCY_VND
+        ]);
+
+        $response->assertForbidden();
     }
 
     public function testCustomerCanSeeADebitCardTransaction()
     {
-        // get /debit-card-transactions/{debitCardTransaction}
+        $transaction = DebitCardTransaction::factory()->for($this->debitCard)->create();
+
+        $response = $this->getJson("api/debit-card-transactions/{$transaction->id}?debit_card_id={$this->debitCard->id}");
+        $response
+            ->assertOk()
+            ->assertJson(['amount' => $transaction->amount, 'currency_code' => $transaction->currency_code])
+            ->assertJsonStructure(['amount', 'currency_code']);
     }
 
     public function testCustomerCannotSeeADebitCardTransactionAttachedToOtherCustomerDebitCard()
     {
-        // get /debit-card-transactions/{debitCardTransaction}
-    }
+        $debitCard = DebitCard::factory()->create();
+        $transaction = DebitCardTransaction::factory()->for($debitCard)->create();
 
-    // Extra bonus for extra tests :)
+        $response = $this->getJson("api/debit-card-transactions/{$transaction->id}?debit_card_id={$debitCard->id}");
+        $response->assertForbidden();
+    }
 }
