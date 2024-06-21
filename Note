@@ -1,0 +1,6 @@
+Error LoanServiceTest (im so sorry if im wrong):
+1. Semua nilai 1667 harusnya 1668 ( Karena default loan = 5000, terms 3x, default value 1666,1666,1667 = 4999 !== 5000, kalau 4x baru sisa 1, cuman terms diLoanServiceTest = 3, bukan 4 )
+2. line 290, harusnya value 1666, bukan 1667 untuk schedule ke 2, karena pada initial value schedule ke 2 pada line 243 = 1666
+3. line 291 harusnya 334, bukan 333, karena 2000 - 1666 = 334 (pada schedule ke 2 = 1666)
+4. line 279 harusnya 1666, bukan 1667, karena initial value schedule pertama = 1666
+5. Line 211 harusnya due date 2020-04-20, bukan 2020-02-20, karena initial pembayaran terahir = 2020-04-20
