@@ -128,7 +128,20 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanDeactivateADebitCard()
     {
+        $debitCard = DebitCard::factory()->active()->for($this->user)->create();
+        $payload = [
+            'is_active' => false,
+        ];
+
         // put api/debit-cards/{debitCard}
+        $response = $this->putJson("/api/debit-cards/{$debitCard->id}", $payload);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure(['id', 'number', 'type', 'expiration_date', 'is_active'])
+            ->assertJsonFragment(['is_active' => false]);
+
+        $debitCard->refresh();
+        $this->assertFalse($debitCard->is_active);
     }
 
     public function testCustomerCannotUpdateADebitCardWithWrongValidation()
