@@ -69,6 +69,8 @@ class DebitCardControllerTest extends TestCase
 
         $this->assertDatabaseHas('debit_cards', [
             'id' => $response->json('id'),
+            'user_id' => $this->user->id,
+            'type' => $payload["type"],
         ]);
     }
 
