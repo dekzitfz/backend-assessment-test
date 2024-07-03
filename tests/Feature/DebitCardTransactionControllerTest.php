@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\DebitCard;
+use App\Models\DebitCardTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Passport\Passport;
@@ -27,7 +28,15 @@ class DebitCardTransactionControllerTest extends TestCase
 
     public function testCustomerCanSeeAListOfDebitCardTransactions()
     {
+        $numberOfTransactions = 3;
+        $transactions = DebitCardTransaction::factory($numberOfTransactions)->for($this->debitCard)->create();
+
         // get /debit-card-transactions
+        $response = $this->getJson("api/debit-card-transactions?debit_card_id={$this->debitCard->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonCount($numberOfTransactions)
+            ->assertJsonStructure(['*' => ['amount', 'currency_code']]);
     }
 
     public function testCustomerCannotSeeAListOfDebitCardTransactionsOfOtherCustomerDebitCard()
