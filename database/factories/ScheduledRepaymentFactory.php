@@ -33,4 +33,16 @@ class ScheduledRepaymentFactory extends Factory
             'status' => ScheduledRepayment::STATUS_DUE,
         ];
     }
+
+    /**
+     * Configure the model factory.
+     *
+     * @return $this
+     */
+    public function configure(): ScheduledRepaymentFactory
+    {
+        return $this->afterMaking(function (ScheduledRepayment $sp) {
+            $sp->outstanding_amount = $sp->outstanding_amount === 0 ? 0 : $sp->amount;
+        });
+    }
 }
