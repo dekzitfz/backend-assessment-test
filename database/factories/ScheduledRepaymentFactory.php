@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Loan;
 use App\Models\ScheduledRepayment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,8 +22,27 @@ class ScheduledRepaymentFactory extends Factory
      */
     public function definition(): array
     {
+        $amount = $this->faker->numberBetween(1000, 2000);
+
         return [
-            // TODO: Complete factory
+            'loan_id' => fn() => Loan::factory()->create(),
+            'amount' => $amount,
+            'outstanding_amount' => $amount,
+            'currency_code' => Loan::CURRENCY_SGD,
+            'due_date' => $this->faker->dateTimeThisYear(),
+            'status' => ScheduledRepayment::STATUS_DUE,
         ];
+    }
+
+    /**
+     * Configure the model factory.
+     *
+     * @return $this
+     */
+    public function configure(): ScheduledRepaymentFactory
+    {
+        return $this->afterMaking(function (ScheduledRepayment $sp) {
+            $sp->outstanding_amount = $sp->outstanding_amount === 0 ? 0 : $sp->amount;
+        });
     }
 }

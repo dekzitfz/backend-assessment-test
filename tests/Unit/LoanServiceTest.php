@@ -64,8 +64,8 @@ class LoanServiceTest extends TestCase
         ]);
         $this->assertDatabaseHas('scheduled_repayments', [
             'loan_id' => $loan->id,
-            'amount' => 1667,
-            'outstanding_amount' => 1667,
+            'amount' => 1668,
+            'outstanding_amount' => 1668,
             'currency_code' => $currencyCode,
             'due_date' => '2020-04-20',
             'status' => ScheduledRepayment::STATUS_DUE,
@@ -177,13 +177,13 @@ class LoanServiceTest extends TestCase
         // Only the last one is due
         $scheduledRepaymentThree =  ScheduledRepayment::factory()->create([
             'loan_id' => $loan->id,
-            'amount' => 1667,
+            'amount' => 1668,
             'currency_code' => Loan::CURRENCY_VND,
             'due_date' => '2020-04-20',
             'status' => ScheduledRepayment::STATUS_DUE,
         ]);
 
-        $receivedRepayment = 1667;
+        $receivedRepayment = 1668;
         $currencyCode = Loan::CURRENCY_VND;
         $receivedAt = '2020-04-20';
 
@@ -205,17 +205,17 @@ class LoanServiceTest extends TestCase
         $this->assertDatabaseHas('scheduled_repayments', [
             'id' => $scheduledRepaymentThree->id,
             'loan_id' => $loan->id,
-            'amount' => 1667,
+            'amount' => 1668,
             'outstanding_amount' => 0,
             'currency_code' => $currencyCode,
-            'due_date' => '2020-02-20',
+            'due_date' => '2020-04-20',
             'status' => ScheduledRepayment::STATUS_REPAID,
         ]);
 
         // Asserting Received Repayment
         $this->assertDatabaseHas('received_repayments', [
             'loan_id' => $loan->id,
-            'amount' => 1667,
+            'amount' => 1668,
             'currency_code' => $currencyCode,
             'received_at' => '2020-04-20',
         ]);
@@ -276,7 +276,7 @@ class LoanServiceTest extends TestCase
         $this->assertDatabaseHas('scheduled_repayments', [
             'id' => $scheduledRepaymentOne->id,
             'loan_id' => $loan->id,
-            'amount' => 1667,
+            'amount' => 1666,
             'outstanding_amount' => 0,
             'currency_code' => $currencyCode,
             'due_date' => '2020-02-20',
@@ -287,8 +287,8 @@ class LoanServiceTest extends TestCase
         $this->assertDatabaseHas('scheduled_repayments', [
             'id' => $scheduledRepaymentTwo->id,
             'loan_id' => $loan->id,
-            'amount' => 1667,
-            'outstanding_amount' => 333, // 2000 - 1667
+            'amount' => 1666,
+            'outstanding_amount' => 1332, // 1666 - (2000 - 1666)
             'currency_code' => $currencyCode,
             'due_date' => '2020-03-20',
             'status' => ScheduledRepayment::STATUS_PARTIAL,
