@@ -16,7 +16,11 @@ class CreateDebitCardsTable extends Migration
         Schema::create('debit_cards', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
+<<<<<<< HEAD
             $table->unsignedBigInteger('number');
+=======
+            $table->unsignedInteger('number');
+>>>>>>> 8319601 (Feat: Fix migration table)
             $table->string('type');
             $table->dateTime('expiration_date');
             $table->dateTime('disabled_at')->nullable()->index();
