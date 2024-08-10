@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ReceivedRepayment extends Model
 {
@@ -23,7 +24,10 @@ class ReceivedRepayment extends Model
      * @var array
      */
     protected $fillable = [
-        //
+        'loan_id',
+        'amount',
+        'currency_code',
+        'received_at',
     ];
 
     /**
@@ -34,5 +38,10 @@ class ReceivedRepayment extends Model
     public function loan()
     {
         return $this->belongsTo(Loan::class, 'loan_id');
+    }
+
+    public function receivedRepayments(): HasMany
+    {
+        return $this->hasMany(ReceivedRepayment::class, 'scheduled_repayment_id');
     }
 }
