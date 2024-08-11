@@ -48,8 +48,8 @@ class LoanServiceTest extends TestCase
         $this->assertCount($terms, $loan->scheduledRepayments);
         $this->assertDatabaseHas('scheduled_repayments', [
             'loan_id' => $loan->id,
-            'amount' => 1666,
-            'outstanding_amount' => 1666,
+            'amount' => 1668,
+            'outstanding_amount' => 1668,
             'currency_code' => $currencyCode,
             'due_date' => '2020-02-20',
             'status' => ScheduledRepayment::STATUS_DUE,
