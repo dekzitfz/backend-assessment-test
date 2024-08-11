@@ -105,7 +105,6 @@ class DebitCardTransactionControllerTest extends TestCase
         $debitCard = DebitCard::factory()->for($otherCustomer)->create();
         $transaction = DebitCardTransaction::factory()->for($debitCard)->create();
 
-        // get /debit-card-transactions/{debitCardTransaction}
         $response = $this->getJson("api/debit-card-transactions/{$transaction->id}");
 
         $response->assertStatus(403);
