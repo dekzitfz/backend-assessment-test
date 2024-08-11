@@ -58,4 +58,9 @@ class Loan extends Model
     {
         return $this->hasMany(ScheduledRepayment::class, 'loan_id');
     }
+
+    public function receivedPayments(): HasMany
+    {
+        return $this->hasMany(ReceivedRepayment::class, 'loan_id');
+    }
 }
