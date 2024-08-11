@@ -151,7 +151,7 @@ class LoanService
             \DB::rollBack();
             throw $th;
         }
-
+        return $receivedPayment;
     }
 
     protected function convertCurrency(string $from, string $to, int $amount): int
