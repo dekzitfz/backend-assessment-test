@@ -35,4 +35,11 @@ class LoanFactory extends Factory
             'status' => Loan::STATUS_DUE,
         ];
     }
+
+    public function configure(): LoanFactory
+    {
+        return $this->afterMaking(function (Loan $loan) {
+            $loan->outstanding_amount = $loan->outstanding_amount === 0 ? 0 : $loan->amount;
+        });
+    }
 }
