@@ -56,7 +56,6 @@ class DebitCardTransactionControllerTest extends TestCase
             'currency_code' => 'IDR',
         ];
 
-        // post /debit-card-transactions
         $response = $this->postJson('/api/debit-card-transactions', $payload);
 
         $response->assertStatus(201)
