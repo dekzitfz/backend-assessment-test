@@ -45,7 +45,13 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanCreateADebitCard()
     {
-        // post /debit-cards
+        $data = [
+            'type' => 'MasterCard',
+        ];
+
+        $response = $this->postJson('/api/debit-cards', $data);
+        $response->assertCreated();
+        $this->assertDatabaseHas('debit_cards', $data + ['user_id' => $this->user->id]); // check if theres debit cards with this user id
     }
 
     public function testCustomerCanSeeASingleDebitCardDetails()
