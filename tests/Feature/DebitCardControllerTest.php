@@ -139,4 +139,16 @@ class DebitCardControllerTest extends TestCase
     }
 
     // Extra bonus for extra tests :)
+
+    public function testCustomerCannotDeleteDebitCardOfOtherCustomers()
+    {
+        $otherUser = User::factory()->create();
+        $otherDebitCard = DebitCard::factory()->for($otherUser)->create();
+
+        $response = $this->deleteJson("/api/debit-cards/{$otherDebitCard->id}");
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas('debit_cards', ['id' => $otherDebitCard->id]);
+    }
 }
