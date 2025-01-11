@@ -87,7 +87,23 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanSeeASingleDebitCardDetails()
     {
+        // create user debit card
+        $create_debit_card = DebitCard::factory()->create(['user_id' => $this->user->id]);
+
         // get api/debit-cards/{debitCard}
+        $response = $this->get("api/debit-cards/$create_debit_card->id");
+
+        // response code 200
+        $response->assertStatus(200);
+
+        //check response with DB
+        $response->assertJson([
+            "id" => $create_debit_card->id,
+            "number" => $create_debit_card->number,
+            "type" => $create_debit_card->type,
+            "expiration_date" => Carbon::parse($create_debit_card->expiration_date)->format('Y-m-d H:i:s'),
+            "is_active" => $create_debit_card->is_active,
+        ]);
     }
 
     public function testCustomerCannotSeeASingleDebitCardDetails()
