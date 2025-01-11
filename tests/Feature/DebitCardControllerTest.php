@@ -222,7 +222,21 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanDeleteADebitCard()
     {
+        // create user debit card
+        $create_debit_card = DebitCard::factory()->create([
+            'user_id' => $this->user->id
+        ]);
+
         // delete api/debit-cards/{debitCard}
+        $response = $this->delete("api/debit-cards/$create_debit_card->id");
+
+        // response staus code 204
+        $response->assertStatus(204);
+
+        // check database if already deleted
+        $debit_card = DebitCard::where('id', $create_debit_card->id)->first();
+
+        $this->assertNull($debit_card);
     }
 
     public function testCustomerCannotDeleteADebitCardWithTransaction()
