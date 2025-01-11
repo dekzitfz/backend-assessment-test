@@ -129,7 +129,7 @@ class DebitCardTransactionControllerTest extends TestCase
             ->create();
 
         // get /debit-card-transactions/{debitCardTransaction}
-        $response = $this->get("api/debit-card-transactions/{$other_user_debit_card_transaction->first()->debit_card_id}");
+        $response = $this->get("api/debit-card-transactions/{$other_user_debit_card_transaction->first()->id}");
 
         // check response
         $response->assertForbidden();
