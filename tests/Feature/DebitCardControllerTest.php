@@ -122,7 +122,42 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanActivateADebitCard()
     {
+        // create user debit card
+        $create_debit_card = DebitCard::factory()->create([
+            'user_id' => $this->user->id
+        ]);
+
+        // request data
+        $put_data = [
+            'is_active' => true
+        ];
+
         // put api/debit-cards/{debitCard}
+        $response = $this->put("api/debit-cards/$create_debit_card->id", $put_data);
+
+        // response code 200
+        $response->assertStatus(200);
+
+        //check debit card number & type input
+        $where_clause = [
+            'user_id' => $create_debit_card->user_id,
+            'number' => $create_debit_card->number,
+        ];
+        $debit_card_user = DebitCard::where($where_clause)->first();
+
+        //check Database if debit card active
+        $is_active_debit_card = is_null($debit_card_user->disabled_at);
+
+        $this->assertTrue($is_active_debit_card);
+
+        // check data response with database
+        $response->assertJson([
+            "id" => $create_debit_card->id,
+            "number" => $create_debit_card->number,
+            "type" => $create_debit_card->type,
+            "expiration_date" => Carbon::parse($create_debit_card->expiration_date)->format('Y-m-d H:i:s'),
+            "is_active" => $put_data['is_active'],
+        ]);
     }
 
     public function testCustomerCanDeactivateADebitCard()
