@@ -108,13 +108,11 @@ class DebitCardTransactionControllerTest extends TestCase
     public function testCustomerCanSeeADebitCardTransaction()
     {
         $user_debit_card_transaction = DebitCardTransaction::factory()->count(5)
-            ->for(DebitCard::factory()->state([
-                'user_id' => $this->user->id,
-            ]))
+            ->for($this->debitCard)
             ->create();
 
         // get /debit-card-transactions/{debitCardTransaction}
-        $response = $this->get("api/debit-card-transactions/{$user_debit_card_transaction->first()->debit_card_id}");
+        $response = $this->get("api/debit-card-transactions/{$user_debit_card_transaction->first()->id}");
 
         // check response
         $response->assertStatus(200);
