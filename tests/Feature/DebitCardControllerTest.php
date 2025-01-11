@@ -62,7 +62,27 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanCreateADebitCard()
     {
+        $post_data = [
+            'type' => 'Visa',
+        ];
+
         // post /debit-cards
+        $response = $this->post('api/debit-cards', $post_data);
+
+        // response code 201
+        $response->assertStatus(201);
+
+        // check data response with database
+        $data_resp = $response->json();
+
+        //check debit card number & type input
+        $where_clause = array_merge($post_data, ['number' => $data_resp['number']]);
+        $debit_card_user = DebitCard::where($where_clause)->first();
+
+        // check if debit card DB same with current user id Login
+        $is_debit_card_number_equal_to_user_id = $debit_card_user->user_id == $this->user->id;
+
+        $this->assertTrue($is_debit_card_number_equal_to_user_id);
     }
 
     public function testCustomerCanSeeASingleDebitCardDetails()
