@@ -44,28 +44,32 @@ class LoanServiceTest extends TestCase
             'status' => Loan::STATUS_DUE,
         ]);
 
+        // Expected Amount
+        $loan_each_month = floor($amount / $terms);
+        $remaining_amount_in_last_month = $amount - ($loan_each_month * ($terms - 1));
+
         // Asserting Scheduled Repayments
         $this->assertCount($terms, $loan->scheduledRepayments);
         $this->assertDatabaseHas('scheduled_repayments', [
             'loan_id' => $loan->id,
-            'amount' => 1666,
-            'outstanding_amount' => 1666,
+            'amount' => $loan_each_month,
+            'outstanding_amount' => $loan_each_month,
             'currency_code' => $currencyCode,
             'due_date' => '2020-02-20',
             'status' => ScheduledRepayment::STATUS_DUE,
         ]);
         $this->assertDatabaseHas('scheduled_repayments', [
             'loan_id' => $loan->id,
-            'amount' => 1666,
-            'outstanding_amount' => 1666,
+            'amount' => $loan_each_month,
+            'outstanding_amount' => $loan_each_month,
             'currency_code' => $currencyCode,
             'due_date' => '2020-03-20',
             'status' => ScheduledRepayment::STATUS_DUE,
         ]);
         $this->assertDatabaseHas('scheduled_repayments', [
             'loan_id' => $loan->id,
-            'amount' => 1667,
-            'outstanding_amount' => 1667,
+            'amount' => $remaining_amount_in_last_month,
+            'outstanding_amount' => $remaining_amount_in_last_month,
             'currency_code' => $currencyCode,
             'due_date' => '2020-04-20',
             'status' => ScheduledRepayment::STATUS_DUE,
