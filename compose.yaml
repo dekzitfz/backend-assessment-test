@@ -1,0 +1,30 @@
+networks:
+  backend_test_net:
+    driver: bridge
+    
+# Names our volume
+volumes:
+  backend_test_mysql:
+
+services:
+
+  mysql:
+    container_name: backend-assessment-test_db
+    restart: unless-stopped
+    image: mysql:8
+    environment:
+      # Dev
+      MYSQL_ROOT_PASSWORD: 'root'
+      # Production
+      # MYSQL_DATABASE: ${DB_DATABASE}
+      # MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      # MYSQL_PASSWORD: ${DB_PASSWORD}
+      # MYSQL_USER: ${DB_USERNAME}
+    volumes:
+      - backend_test_mysql:/var/lib/mysql
+    networks:
+      - backend_test_net
+    ports:
+      - "3310:3306"
+    expose:
+      - "3310"
