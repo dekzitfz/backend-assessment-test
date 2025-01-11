@@ -61,14 +61,14 @@ class DebitCardTransactionControllerTest extends TestCase
 
     public function testCustomerCanCreateADebitCardTransaction()
     {
-        $other_user_debit_card_transaction = DebitCardTransaction::factory()->count(5)
+        $user_debit_card_transaction = DebitCardTransaction::factory()->count(5)
             ->for(DebitCard::factory()->state([
                 'user_id' => $this->user->id,
             ]))
             ->create();
         
         $post_data = [
-            'debit_card_id' => $other_user_debit_card_transaction->first()->debit_card_id,
+            'debit_card_id' => $user_debit_card_transaction->first()->debit_card_id,
             'amount' => 10000,
             'currency_code' => 'IDR',
         ];
