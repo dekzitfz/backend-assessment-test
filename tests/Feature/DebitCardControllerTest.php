@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\DebitCard;
+use App\Models\DebitCardTransaction;
 use Laravel\Passport\Passport;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -182,12 +183,108 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanDeleteADebitCard()
     {
+        // create a debit card
+        $debitCard = DebitCard::factory()->create([
+            "user_id" => $this->user->id,
+        ]);
+
+        // delete api/debit-cards/{debitCard}
+        $response = $this->deleteJson("api/debit-cards/{$debitCard->id}");
+
+        // expected response code is 204
+        $response->assertStatus(204);
+
+        // check if debit card is soft deleted
+        $this->assertDatabaseHas('debit_cards', [
+            'id' => $debitCard->id,
+            "deleted_at" => now()
+        ]);
     }
 
     public function testCustomerCannotDeleteADebitCardWithTransaction()
     {
+        // create a debit card
+        $debitCard = DebitCard::factory()->create([
+            "user_id" => $this->user->id,
+        ]);
+
+        $transactions = DebitCardTransaction::factory()->create([
+            "debit_card_id" => $debitCard->id,
+        ]);
+
         // delete api/debit-cards/{debitCard}
+        $response = $this->deleteJson("api/debit-cards/{$debitCard->id}");
+
+        // expected response code is 403
+        $response->assertStatus(403);
+
+        // check if debit card with its id still exists
+        $this->assertDatabaseHas('debit_cards', [
+            'id' => $debitCard->id,
+        ]);
     }
 
     // Extra bonus for extra tests :)
+
+        public function testCustomerSeeEmptyDebitCards()
+    {
+        // endpoint get /debit-cards
+        $response = $this->getJson("api/debit-cards");
+
+        // expected response code is 200
+        $response->assertStatus(200);
+
+        // check if actual value (from response) is greater than expected
+        $this->assertEquals(0, count($response->json()));
+    }
+
+    public function testCustomerCreateDebitCardWithValidationError()
+    {
+        // prepare post data for creating debit card
+        $post_data = [
+            "type" => ""
+        ];
+
+        // post /debit-cards
+        $response = $this->postJson("api/debit-cards",$post_data);
+
+        // check if response is error 422
+        $response->assertStatus(422);
+
+        // check if there is a errors response validation with key type
+        $response->assertJsonValidationErrors(['type']);
+    }
+
+    public function testCustomerCannotFoundIdOfDebitCard()
+    {
+        // create user
+        $user2 = User::factory()->create();
+
+        // create 3 debit cards with id from user2
+        $debitCards = DebitCard::factory()->count(3)->create([
+            "user_id" => $user2->id
+        ]);
+
+         // get /debit-cards/{id}
+        $response = $this->getJson("api/debit-cards/99");
+
+        // check response code is 404
+        $response->assertStatus(404);
+    }
+
+    public function testCustomerCanNotDeleteADebitCardBecauseIdNotFound()
+    {
+        // create a debit card
+        $debitCard = DebitCard::factory()->create([
+            "user_id" => $this->user->id,
+        ]);
+
+        $id = $debitCard->id + 11;
+
+        // delete api/debit-cards/{debitCard}
+        $response = $this->deleteJson("api/debit-cards/{$id}");
+
+        // expected response code is 204
+        $response->assertStatus(404);
+    }
 }
