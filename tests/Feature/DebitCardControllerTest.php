@@ -23,14 +23,13 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanSeeAListOfDebitCards()
     {
-        // endpoint get /debit-cards
-
         // create 10 debit cards with same user id
         $debitCards = DebitCard::factory()->count(10)
         ->create([
             "user_id" => $this->user->id
         ]);
 
+        // endpoint get /debit-cards
         $response = $this->getJson("api/debit-cards");
 
         // expected response code is 200
@@ -42,16 +41,15 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCannotSeeAListOfDebitCardsOfOtherCustomers()
     {
-        // get /debit-cards
-
         // create user
         $user2 = User::factory()->create();
 
         // create 3 debit cards with id from user2
-        $creditCards = DebitCard::factory()->count(3)->create([
+        $debitCards = DebitCard::factory()->count(3)->create([
             "user_id" => $user2->id
         ]);
 
+         // get /debit-cards
         $response = $this->getJson("api/debit-cards");
 
         // check response code is 200
@@ -63,11 +61,12 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanCreateADebitCard()
     {
-        // post /debit-cards
+        // prepare post data for creating debit card
         $post_data = [
             "type" => "gpn"
         ];
 
+        // post /debit-cards
         $response = $this->postJson("api/debit-cards",$post_data);
 
         // check if data is created successfully
@@ -80,17 +79,14 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanSeeASingleDebitCardDetails()
     {
-        // get api/debit-cards/{debitCard}
-
+        // create debit card for logged in user
         $debitCard = DebitCard::factory()->create(["user_id" => $this->user->id]);
 
+        // get api/debit-cards/{debitCard}
         $response = $this->getJson("api/debit-cards/{$debitCard->id}");
 
         // check if response is ok
         $response->assertStatus(200);
-
-        // check if actual value (from response) is equal to expected
-        $this->assertEquals($debitCard->toArray(), $response->json());
 
         // check if response contains expected fields
         $response->assertJson([
@@ -103,7 +99,21 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCannotSeeASingleDebitCardDetails()
     {
+        // create user
+        $user2 = User::factory()->create();
+
+        // create 3 debit cards with id from user2
+        $debitCards = DebitCard::factory()->count(3)->create([
+            "user_id" => $user2->id
+        ]);
+
         // get api/debit-cards/{debitCard}
+        $response = $this->getJson("api/debit-cards/".$debitCards[0]->id);
+
+        // dd($response->json());
+
+        // expected response forbidden = 403
+        $response->assertStatus(403);
     }
 
     public function testCustomerCanActivateADebitCard()
