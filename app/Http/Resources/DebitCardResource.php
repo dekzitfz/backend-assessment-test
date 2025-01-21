@@ -26,6 +26,7 @@ class DebitCardResource extends JsonResource
             'type' => $this->type,
             'expiration_date' => $this->expiration_date,
             'is_active' => $this->is_active,
+            'disabled_at' => $this->disabled_at
         ];
     }
 }
