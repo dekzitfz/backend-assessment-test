@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Passport\Passport;
 use Tests\TestCase;
+use App\Models\User;
+use App\Models\DebitCard;
+use Laravel\Passport\Passport;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class DebitCardControllerTest extends TestCase
 {
@@ -22,7 +23,21 @@ class DebitCardControllerTest extends TestCase
 
     public function testCustomerCanSeeAListOfDebitCards()
     {
-        // get /debit-cards
+        // endpoint get /debit-cards
+
+        // create 10 debit cards with same user id
+        $debitCards = DebitCard::factory()->count(10)
+        ->create([
+            "user_id" => $this->user->id
+        ]);
+
+        $response = $this->getJson("api/debit-cards");
+
+        // expected response code is 200
+        $response->assertStatus(200);
+
+        // check if actual value (from response) is greater than expected
+        $this->assertGreaterThan(0, count($response->json()));
     }
 
     public function testCustomerCannotSeeAListOfDebitCardsOfOtherCustomers()
