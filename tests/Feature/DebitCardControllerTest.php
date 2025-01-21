@@ -71,7 +71,7 @@ class DebitCardControllerTest extends TestCase
         $response = $this->postJson("api/debit-cards",$post_data);
 
         // check if data is created successfully
-        $response->assertCreated();
+        $response->assertStatus(201);
 
         $this->assertDatabaseHas('debit_cards', $post_data + [
             'user_id' => $this->user->id,
@@ -81,6 +81,24 @@ class DebitCardControllerTest extends TestCase
     public function testCustomerCanSeeASingleDebitCardDetails()
     {
         // get api/debit-cards/{debitCard}
+
+        $debitCard = DebitCard::factory()->create(["user_id" => $this->user->id]);
+
+        $response = $this->getJson("api/debit-cards/{$debitCard->id}");
+
+        // check if response is ok
+        $response->assertStatus(200);
+
+        // check if actual value (from response) is equal to expected
+        $this->assertEquals($debitCard->toArray(), $response->json());
+
+        // check if response contains expected fields
+        $response->assertJson([
+            'id' => $debitCard->id,
+            'number' => $debitCard->number,
+            'type' => $debitCard->type,
+            'is_active' => $debitCard->is_active,
+        ]);
     }
 
     public function testCustomerCannotSeeASingleDebitCardDetails()
