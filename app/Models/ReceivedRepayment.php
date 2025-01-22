@@ -26,7 +26,7 @@ class ReceivedRepayment extends Model
         'loan_id',
         'amount',
         'currency_code',
-        'status',
+        'received_at',
     ];
 
     /**

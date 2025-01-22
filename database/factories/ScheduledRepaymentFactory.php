@@ -23,12 +23,12 @@ class ScheduledRepaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            'loan_id' => fn () => Loan::factory(),
+            'loan_id' => fn () => Loan::factory()->create(),
             'amount' => $this->faker->randomNumber(),
             'outstanding_amount' => $this->faker->randomNumber(),
             'currency_code' => Loan::CURRENCY_VND,
             'due_date' => $this->faker->date(),
-            'status' => Loan::STATUS_DUE,
+            'status' => ScheduledRepayment::STATUS_DUE,
         ];
     }
 }
