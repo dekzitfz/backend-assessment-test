@@ -39,6 +39,18 @@ class Loan extends Model
         'status',
     ];
 
+    protected static function booted()
+    {
+        static::creating(function ($loan) {
+            if ($loan->outstanding_amount === null) {
+                $loan->outstanding_amount = $loan->amount;
+            }
+            if ($loan->status === null) {
+                $loan->status = self::STATUS_DUE;
+            }
+        });
+    }
+
     /**
      * A Loan belongs to a User
      *
@@ -57,5 +69,15 @@ class Loan extends Model
     public function scheduledRepayments()
     {
         return $this->hasMany(ScheduledRepayment::class, 'loan_id');
+    }
+
+    /**
+     * An User has many debit cards
+     *
+     * @return HasMany
+     */
+    public function receivedRepayments()
+    {
+        return $this->hasMany(ReceivedRepayment::class, 'loan_id');
     }
 }
